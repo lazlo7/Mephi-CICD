@@ -1,6 +1,0 @@
-services:
-  fastapi-sample:
-    image: ghcr.io/lazlo7/fastapi-sample:latest
-    restart: unless-stopped
-    ports:
-      - "45267:8123"
