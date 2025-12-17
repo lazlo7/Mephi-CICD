@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   main:
-    name: Main
+    name: Build & Test
     # This will already have python installed.
     runs-on: ${{ matrix.os }}
 
