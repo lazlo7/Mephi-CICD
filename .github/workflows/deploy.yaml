@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  # Run whenever there is an update to main.
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  # Write access to package for pushing docker image.
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout repo.
+      - uses: actions/checkout@v4
+
+      # Prepare docker image builder system.
+      - uses: docker/setup-buildx-action@v3
+
+      # Log in to gchr.io, where the built image will be stored in.
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          # github.actor - whoever triggered the workflow.
+          username: ${{ github.actor }}
+          # secrets.GITHUB_TOKEN automatically provided by github.
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          # Sample tags for the image.
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+
+  deploy:
+    # Do this in another job to separate concerns/environments.
+    runs-on: ubuntu-latest
+    # Still depend on the build-and-push job, since we need the new image to be pushed.
+    needs: build-and-push
+    steps:
+      - name: SSH and restart on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_SERVER_HOST }}
+          username: ${{ secrets.DEPLOY_SERVER_USER }}
+          key: ${{ secrets.DEPLOY_SERVER_SSH_KEY }}
+          script: |
+            # Fail on any error.
+            set -e
+            cd "${{ secrets.DEPLOY_SERVER_APP_DIR }}"
+            # The user is inside the docker group, no sudo needed.
+            docker compose pull
+            docker compose up -d
+            # Prune old images to save space.
+            docker image prune -f
