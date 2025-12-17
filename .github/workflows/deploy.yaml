@@ -30,6 +30,14 @@ jobs:
           # secrets.GITHUB_TOKEN automatically provided by github.
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Our repo name has capital letters, but ghcr.io allows only lowercase.
+      # We could hardcode proper name for ghcr.io, but it would break potential forks.
+      # That's why we normalize the name here.
+      - name: Normalize repo name
+        id: repo
+        run: |
+          echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -37,8 +45,8 @@ jobs:
           push: true
           # Sample tags for the image.
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ steps.repo.outputs.name }}:latest
+            ghcr.io/${{ steps.repo.outputs.name }}:${{ github.sha }}
 
   deploy:
     # Do this in another job to separate concerns/environments.
