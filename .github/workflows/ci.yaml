@@ -1,9 +1,11 @@
 name: Build & Test
 
-# Check for PR's to main.
 on:
+  # Check for PR's to main.
   pull_request:
     branches: [ "main" ]
+  # Manual trigger to test.
+  workflow_dispatch:
 
 # Only allow read acces for token.
 permissions:
