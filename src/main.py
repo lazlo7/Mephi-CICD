@@ -10,6 +10,11 @@ async def read_root():
     return {"Hello": "World"}
 
 
+@app.get("/bye")
+async def get_bye():
+    return {"Bye": "World"}
+
+
 @app.get("/calc")
 async def get_calc(x: int = 0):
     return {"result": await calculate_some_value(x)}

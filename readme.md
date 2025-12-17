@@ -2,6 +2,7 @@
 
 tl;dr:
 - `GET /` -> hello, world;
+- `GET /bye` -> bye, world;
 - `GET /berry` -> random berry of the day;
 - `GET /calc?x=100` -> return x + super secret number.
 
