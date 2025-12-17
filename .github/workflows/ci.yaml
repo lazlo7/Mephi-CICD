@@ -10,11 +10,12 @@ permissions:
   contents: read
 
 jobs:
-  tests:
-    name: Python tests: ${{ matrix.os }}
+  main:
+    name: Main
     # This will already have python installed.
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
+    # Strategy for this job.
     strategy:
       # Continue testing on other OSes even if one fails.
       fail-fast: false
